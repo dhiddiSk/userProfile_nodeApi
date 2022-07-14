@@ -1,6 +1,10 @@
-# NodeJS_BE API.
+# User Register, Login, Profile API.
 
-# All the tech Used, including the frameworks, libraries, 
+## Tech used in building API : 1. NodeJS
+							   2. ExpressJS(Web framework)
+							   3. PassportJWT, Passport
+							   
+							   , including the frameworks, libraries, 
 
 # Goal : Allow a new user to get registered for the site and for only once. Respond the request with data. Use jwt tokens for the authentication of new user profile page.
 
