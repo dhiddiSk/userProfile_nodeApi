@@ -2,12 +2,11 @@
 
 ## Tech used in building API : 1. NodeJS
 							   2. ExpressJS(Web framework)
-							   3. PassportJWT, Passport
-							   
-							   , including the frameworks, libraries, 
+							   3. MongoDB(Database)
+							   4. Libraries/Packages("bcryptjs", "body-parser", "express", "jsonwebtoken", "mongoose", "passport", "passport-jwt", "validator")
 
-# Goal : Allow a new user to get registered for the site and for only once. Respond the request with data. Use jwt tokens for the authentication of new user profile page.
+## Goal : Allow new users registration, check the user profile only after proper authentication, update the user profile data.
 
-# detail about the endpoints and it's responces.
+### Endpoints:  
 
-# Provide an example on how any one can setup the project and use it. Make sure it's only possible if they use their mongoDB.
+### Setup the project: 
