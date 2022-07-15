@@ -1,4 +1,4 @@
-import User from "./models/UserRegister.js";
+import UserRegister from "./models/UserRegister.js";
 import * as constant from "./setupSupport/constants.js";
 const express = require("express");
 const passport = require("passport");
@@ -13,7 +13,7 @@ await mongoose.connect(constant.mongoURL).then(() => {
     console.log("The mongoDB has connected successfully");
 }).catch(error => console.log(error));
 
-application.use("/register", authorization);
+application.use("/api/auth", authorization);
 
 application.get("/", (req, res) => {
     res.send("Welcome to user registration application :)");
