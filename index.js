@@ -8,8 +8,8 @@ const applicationPortNumber = 3000;
 const application = express();
 
 await mongoose.connect(constant.mongoURL).then(() => {
-    console.log("The DB has connected successfully")
-}).catch(err => console.log(err));
+    console.log("The mongoDB has connected successfully");
+}).catch(error => console.log(error));
 
 
 application.get("/", (req, res) => {
