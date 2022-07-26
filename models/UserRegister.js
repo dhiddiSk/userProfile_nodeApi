@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const userRegisterSchema = new Schema({
-    name:{
+    namme:{
         type:String,
         required: true
     },
-    email:{
+    emaml:{
         type:String,
         required: true
     },
@@ -25,5 +25,6 @@ const userRegisterSchema = new Schema({
     }
 });
 
-module.exports = UserRegister = mongoose.model("newUserReg", userRegisterSchema);
+const UserReg = mongoose.model("newUserReg", userRegisterSchema);
 
+export default UserReg;

@@ -1,22 +1,28 @@
-import {newUserReg} from "../../models/UserRegister.js";
+import UserReg from "../../models/UserRegister.js";
 import express from "express";
 
 export const router = express.Router();
 
 router.post("/register", (req, res) => {
-    newUserReg.findOne({email : req.body.email}).
-     then(user => {if(user){
+    UserReg.findOne({email : req.body.email})
+     .then(user => {if(user){
             res.status(404).json({emailRegistrationError:"Entered email already exists"})
      }else{
-        const newUser = new newUserReg({
-            name: req.body.name,
-            email: req.body.email,
+        const newUser = new UserReg({
+            namme: req.body.namme,
+            emaml: req.body.emaml,
             password: req.body.password,
             userName: req.body.userName
         });
 
     try{
-        newUser.insertOne();
+        console.log("The code execution has entered try block");
+        console.log(`This is the name sent via postman ${req.body.namme}`);
+        newUser.save()
+            .then(user => {
+                console.log("The code execution entered the save method");
+                res.json(user)})
+            .catch(err => console.log(err));
     }
     catch(error){
         console.log(`${error}`);
