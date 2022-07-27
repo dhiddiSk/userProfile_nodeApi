@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
+// The below is the schema for the user registration
+
 const userRegisterSchema = new Schema({
     namme:{
         type:String,
