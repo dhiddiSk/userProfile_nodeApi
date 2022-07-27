@@ -29,15 +29,14 @@ router.post("/register", (req, res) => {
             bcrypt.hash(newUser.password, salt, function (hasherr, hash) {
               if (hasherr) throw hasherr;
               newUser.password = hash;
+              newUser
+                .save()
+                .then((user) => {
+                  res.json(user);
+                })
+                .catch((err) => console.log(err));
             });
           });
-
-          newUser
-            .save()
-            .then((user) => {
-              res.json(user);
-            })
-            .catch((err) => console.log(err));
         } catch (error) {
           console.log(`${error}`);
         }
@@ -65,13 +64,9 @@ router.post("/login", (req, res) => {
       }
 
       if (emailExists) {
-        console.log(req.body.email);
-        console.log(req.body.password);
-
         bcrypt
           .compare(password, emailExists.password)
           .then((correctPassword) => {
-            console.log(correctPassword);
             if (!correctPassword) {
               res.status(401).json({ emailLoginMessage: "User login failure" });
             }
