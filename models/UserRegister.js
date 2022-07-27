@@ -5,11 +5,11 @@ const Schema = mongoose.Schema;
 // The below is the schema for the user registration
 
 const userRegisterSchema = new Schema({
-    namme:{
+    name:{
         type:String,
         required: true
     },
-    emaml:{
+    email:{
         type:String,
         required: true
     },

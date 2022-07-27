@@ -25,13 +25,12 @@ router.post("/register", (req, res) => {
         });
 
         try {
-
-            bcrypt.genSalt(10, function(err, salt) {
-                bcrypt.hash(newUser.password, salt, function(hasherr, hash) {
-                    if (hasherr) throw hasherr;
-                    newUser.password = hash;
-                });
+          bcrypt.genSalt(10, function (err, salt) {
+            bcrypt.hash(newUser.password, salt, function (hasherr, hash) {
+              if (hasherr) throw hasherr;
+              newUser.password = hash;
             });
+          });
 
           newUser
             .save()
@@ -45,4 +44,47 @@ router.post("/register", (req, res) => {
       }
     })
     .catch((error) => console.log(`Registration error: ${error}`));
+});
+
+// @type    POST
+// @route    /api/auth/login
+// @desc    route for login of registered users
+// @access  PUBLIC
+
+router.post("/login", (req, res) => {
+  //  If the user email exists then compare the user with the password, if password matches then return string
+  //"you can login successfully". If password don't match "Your credentials are incorrect".  If email doesn't exists
+  // "Then your email doesn't exist".
+  const password = req.body.password;
+  UserReg.findOne({ email: req.body.email })
+    .then((emailExists) => {
+      if (!emailExists) {
+        res
+          .status(404)
+          .json({ emailRegistrationError: "Email doesn't exists" });
+      }
+
+      if (emailExists) {
+        console.log(req.body.email);
+        console.log(req.body.password);
+
+        bcrypt
+          .compare(password, emailExists.password)
+          .then((correctPassword) => {
+            console.log(correctPassword);
+            if (!correctPassword) {
+              res.status(401).json({ emailLoginMessage: "User login failure" });
+            }
+            res
+              .status(200)
+              .json({ emailLoginMessage: "User logged in successfully" });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 });
