@@ -3,6 +3,7 @@ import  express from "express";
 import  mongoose from "mongoose";
 import  {router} from "./routes/api/Auth.js";
 import bodyParser from "body-parser";
+import passport from "passport";
 
 const applicationPortNumber = 3000;
 
@@ -18,6 +19,8 @@ mongoose.connect(db).then(() => {
 }).catch(error => console.log(error));
 
 application.use("/api/auth", router);
+application.use(passport.initialize());
+//require("./strategies/passportJwt")(passport);
 
 // @type    GET
 // @route    /

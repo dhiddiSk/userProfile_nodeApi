@@ -1,6 +1,8 @@
 import UserReg from "../../models/UserRegister.js";
 import express from "express";
 import bcrypt from "bcryptjs";
+import jsonwt from "jsonwebtoken";
+import * as constants from "../../setupSupport/constants.js";
 
 export const router = express.Router();
 
@@ -32,7 +34,7 @@ router.post("/register", (req, res) => {
               newUser
                 .save()
                 .then((user) => {
-                  res.json(user);
+                  res.status(201).json({userCreated:"user has been registered"});
                 })
                 .catch((err) => console.log(err));
             });
@@ -55,28 +57,43 @@ router.post("/login", (req, res) => {
   //"you can login successfully". If password don't match "Your credentials are incorrect".  If email doesn't exists
   // "Then your email doesn't exist".
   const password = req.body.password;
-  UserReg.findOne({ email: req.body.email })
+  const email = req.body.email;
+  UserReg.findOne({email})
     .then((emailExists) => {
-      if (!emailExists) {
-        res
-          .status(404)
-          .json({ emailRegistrationError: "Email doesn't exists" });
-      }
-
       if (emailExists) {
         bcrypt
           .compare(password, emailExists.password)
           .then((correctPassword) => {
             if (!correctPassword) {
-              res.status(401).json({ emailLoginMessage: "User login failure" });
+              return res.status(401).json({ emailLoginMessage: "User login failure" });
             }
-            res
-              .status(200)
-              .json({ emailLoginMessage: "User logged in successfully" });
+
+            const payload = {
+              id: emailExists.id,
+              name: emailExists.name,
+              email: emailExists.email
+            };
+
+            jsonwt.sign(payload, constants.secret, { expiresIn: 3600 },
+              (err, token) => {
+                res.json({
+                  success: true,
+                  token: "Bearer " + token
+                });
+              });
+
+            // res
+            //   .status(200)
+            //   .json({ emailLoginMessage: "User logged in successfully" });
+
           })
           .catch((error) => {
             console.log(error);
           });
+      } else{
+        return res
+        .status(404)
+        .json({ emailRegistrationError: "Email doesn't exists" });
       }
     })
     .catch((error) => {
