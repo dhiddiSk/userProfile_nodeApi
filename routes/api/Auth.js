@@ -2,7 +2,8 @@ import UserReg from "../../models/UserRegister.js";
 import express from "express";
 import bcrypt from "bcryptjs";
 import jsonwt from "jsonwebtoken";
-import * as constants from "../../setupSupport/constants.js";
+import * as constant from "../../setup/constants.js";
+import passport from "passport";
 
 export const router = express.Router();
 
@@ -74,7 +75,7 @@ router.post("/login", (req, res) => {
               email: emailExists.email
             };
 
-            jsonwt.sign(payload, constants.secret, { expiresIn: 3600 },
+            jsonwt.sign(payload, constant.secret, { expiresIn: 3600 },
               (err, token) => {
                 res.json({
                   success: true,
@@ -99,4 +100,18 @@ router.post("/login", (req, res) => {
     .catch((error) => {
       console.log(error);
     });
+});
+
+// @type    GET
+//@route    /api/auth/profile
+// @desc    route for user profile
+// @access  PRIVATE
+
+router.get("/profile", passport.authenticate("jwt", { session: false }),
+(req, res) => {
+      res.json({
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email
+      });
 });

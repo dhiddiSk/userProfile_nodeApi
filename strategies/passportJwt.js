@@ -1,5 +1,5 @@
 import passJwt from "passport-jwt";
-import * as constant from "../setupSupport/constants"
+import * as constant from "../setup/constants"
 import passport from "passport";
 import UserReg from "../models/UserRegister.js";
 const jwtStrategy =  passJwt.Strategy;
@@ -9,7 +9,7 @@ const options = {}
 options.jwtFromRequest = extractJwt.fromAuthHeaderAsBearerToken();
 options.secretOrKey = constant.secret;
 
-passport.use(new jwtStrategy(options, (jwt_payload, done) => {
+export const passportjwtStra = passport.use(new jwtStrategy(options, (jwt_payload, done) => {
     UserReg.findById(jwt_payload.id)
         .then(person => {
           if (person) {
