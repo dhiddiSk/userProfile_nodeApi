@@ -79,7 +79,7 @@ router.post("/login", (req, res) => {
               (err, token) => {
                 res.json({
                   success: true,
-                  token: "Bearer " + token
+                  token: token
                 });
               });
 
@@ -109,7 +109,7 @@ router.post("/login", (req, res) => {
 
 router.get("/profile", passport.authenticate("jwt", { session: false }),
 (req, res) => {
-      res.json({
+      res.status(200).json({
         id: req.user.id,
         name: req.user.name,
         email: req.user.email
