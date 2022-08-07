@@ -20,7 +20,7 @@ router.post("/register", (req, res) => {
           .status(404)
           .json({ emailRegistrationError: "Entered email already exists" });
       } else {
-        // If email exists        
+        // If email exists
         const newUser = new UserRegSchema({
           name: req.body.name,
           email: req.body.email,
@@ -117,23 +117,54 @@ router.get(
   }
 );
 
-// @type    GET
+// @type    POST
 //@route    /api/auth/update
-// @desc    route for user profile update
+// @desc    route for user profile update of oldpassword with new password
 // @access  PRIVATE (authenticated using jwt token)
 
-router.get(
+router.post(
   "/update",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const userEmail = req.body.email;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.password;
 
-    
+    UserRegSchema.findOne({ userEmail }).then((user) => {
+      if (user) {
+        bcrypt
+          .compare(oldPassword, user.password)
+          .then((correctPassword) => {
+            if (!correctPassword) {
+              return res
+                .status(401)
+                .json({ profileUpdate: "Your old password does not match" });
+            }
 
+            // Generated hash of the new password
 
-    res.status(200).json({
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
+            bcrypt.genSalt(10, function (err, salt) {
+              bcrypt.hash(newPassword, salt, function (hasherr, hash) {
+                if (hasherr) throw hasherr;
+                newPassword = hash;
+
+                // Update the password in the database
+                UserRegSchema.updateOne(
+                  { _id: user._id },
+                  { $set: { password: `"${newPassword}"` } }
+                );
+              });
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        return res
+          .status(404)
+          .json({ emailRegistrationError: "Email doesn't exists" });
+      }
+      res.status(200).json({ status: "Your password updated sucessfully" });
     });
   }
 );
