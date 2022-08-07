@@ -1,26 +1,27 @@
-import UserReg from "../../models/UserRegister.js";
+import UserRegSchema from "../../models/UserRegisterSchema.js";
 import express from "express";
 import bcrypt from "bcryptjs";
 import jsonwt from "jsonwebtoken";
-import * as constant from "../../setup/constants.js";
+import { secret } from "../../setup/constants.js";
 import passport from "passport";
 
 export const router = express.Router();
 
 // @type    POST
-// @route    /api/auth/register
+// @route   /api/auth/register
 // @desc    route for registration of users
 // @access  PUBLIC
 
 router.post("/register", (req, res) => {
-  UserReg.findOne({ email: req.body.email })
+  UserRegSchema.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
         res
           .status(404)
           .json({ emailRegistrationError: "Entered email already exists" });
       } else {
-        const newUser = new UserReg({
+        // If email exists        
+        const newUser = new UserRegSchema({
           name: req.body.name,
           email: req.body.email,
           password: req.body.password,
@@ -32,10 +33,14 @@ router.post("/register", (req, res) => {
             bcrypt.hash(newUser.password, salt, function (hasherr, hash) {
               if (hasherr) throw hasherr;
               newUser.password = hash;
+
+              //Save the data to database
               newUser
                 .save()
                 .then((user) => {
-                  res.status(201).json({userCreated:"user has been registered"});
+                  res
+                    .status(201)
+                    .json({ userCreated: "user has been registered" });
                 })
                 .catch((err) => console.log(err));
             });
@@ -54,47 +59,40 @@ router.post("/register", (req, res) => {
 // @access  PUBLIC
 
 router.post("/login", (req, res) => {
-  //  If the user email exists then compare the user with the password, if password matches then return string
-  //"you can login successfully". If password don't match "Your credentials are incorrect".  If email doesn't exists
-  // "Then your email doesn't exist".
   const password = req.body.password;
   const email = req.body.email;
-  UserReg.findOne({email})
-    .then((emailExists) => {
-      if (emailExists) {
+  UserRegSchema.findOne({ email })
+    .then((user) => {
+      if (user) {
         bcrypt
-          .compare(password, emailExists.password)
+          .compare(password, user.password)
           .then((correctPassword) => {
             if (!correctPassword) {
-              return res.status(401).json({ emailLoginMessage: "User login failure" });
+              return res
+                .status(401)
+                .json({ emailLoginMessage: "User login failure" });
             }
 
             const payload = {
-              id: emailExists.id,
-              name: emailExists.name,
-              email: emailExists.email
+              id: user.id,
+              name: user.name,
+              email: user.email,
             };
 
-            jsonwt.sign(payload, constant.secret, { expiresIn: 3600 },
-              (err, token) => {
-                res.json({
-                  success: true,
-                  token: token
-                });
+            jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
+              res.json({
+                success: true,
+                token: token,
               });
-
-            // res
-            //   .status(200)
-            //   .json({ emailLoginMessage: "User logged in successfully" });
-
+            });
           })
           .catch((error) => {
             console.log(error);
           });
-      } else{
+      } else {
         return res
-        .status(404)
-        .json({ emailRegistrationError: "Email doesn't exists" });
+          .status(404)
+          .json({ emailRegistrationError: "Email doesn't exists" });
       }
     })
     .catch((error) => {
@@ -105,13 +103,37 @@ router.post("/login", (req, res) => {
 // @type    GET
 //@route    /api/auth/profile
 // @desc    route for user profile
-// @access  PRIVATE
+// @access  PRIVATE (authenticated using jwt token)
 
-router.get("/profile", passport.authenticate("jwt", { session: false }),
-(req, res) => {
-      res.status(200).json({
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email
-      });
-});
+router.get(
+  "/profile",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.status(200).json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+    });
+  }
+);
+
+// @type    GET
+//@route    /api/auth/update
+// @desc    route for user profile update
+// @access  PRIVATE (authenticated using jwt token)
+
+router.get(
+  "/update",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+
+    
+
+
+    res.status(200).json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+    });
+  }
+);

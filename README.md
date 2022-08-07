@@ -1,4 +1,4 @@
-# User Register, Login, Profile API.
+# User Register, Login, Profile(private) API. done
 
 ## Tech used in building API : 1. NodeJS
 							   2. ExpressJS(Web framework)
