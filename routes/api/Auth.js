@@ -128,20 +128,13 @@ router.post(
   (req, res) => {
     const userEmail = req.body.email;
     const oldPassword = req.body.oldPassword;
-    const newPassword = req.body.password;
+    let newPassword = req.body.password;
 
-   
-
-    UserRegSchema.findOne({ userEmail }).then((user) => {
+   UserRegSchema.find({ "email" : userEmail }).then((user) => {
       if (user) {
-
-        console.log(`userEmail: ${userEmail}`);
-        console.log(`userEmail: ${oldPassword}`);
-        console.log(`oldfromDB: ${user.password}`);
-        console.log(`userEmail: ${newPassword}`);
-
+        console.log(user);
         bcrypt
-          .compare(oldPassword, user.password)
+          .compare(oldPassword, user[0].password)
           .then((correctPassword) => {
             if (!correctPassword) {
               return res
@@ -155,15 +148,17 @@ router.post(
               bcrypt.hash(newPassword, salt, function (hasherr, hash) {
                 if (hasherr) throw hasherr;
                 newPassword = hash;
+                console.log(newPassword);
 
                 // Update the password in the database
                 UserRegSchema.updateOne(
-                  { _id: user._id },
-                  { $set: { "password": `"${newPassword}"` } }
+                  { email: userEmail },
+                  { $set: { password: newPassword } }
                 );
               });
+              res.status(200).json({ status: "Your password updated sucessfully" });
             });
-            res.status(200).json({ status: "Your password updated sucessfully" });
+            
           })
           .catch((error) => {
             console.log(error);
