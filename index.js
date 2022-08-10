@@ -18,9 +18,9 @@ application.use(bodyParser.json());
 mongoose
   .connect(mongoURL)
   .then(() => {
-    console.log("The mongoDB has connected successfully");
+    console.log(`mongoDB has been connected successfully`);
   })
-  .catch((error) => console.log(error));
+  .catch((error) => console.log(`Error while connecting MongoDB: ${error}`));
 
 // middleware
 application.use(passport.initialize());
@@ -32,7 +32,7 @@ application.use("/api/auth", router);
 // @desc    Default route of application
 // @access  PUBLIC
 application.get("/", (req, res) => {
-  res.send("Welcome to user registration application :)");
+  res.send("Welcome to user registration application");
 });
 
 application.listen(userProfileApplicationPortNumber, () => {

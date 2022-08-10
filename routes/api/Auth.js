@@ -16,11 +16,9 @@ router.post("/register", (req, res) => {
   UserRegSchema.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
-        res
-          .status(404)
-          .json({ emailRegistrationError: "Entered email already exists" });
+        res.status(404).json({ message: "Entered email already exists" });
       } else {
-        // If email exists
+        // If email exists in records
         const newUser = new UserRegSchema({
           name: req.body.name,
           email: req.body.email,
@@ -30,6 +28,7 @@ router.post("/register", (req, res) => {
 
         try {
           bcrypt.genSalt(10, function (err, salt) {
+            // hashing the password
             bcrypt.hash(newUser.password, salt, function (hasherr, hash) {
               if (hasherr) throw hasherr;
               newUser.password = hash;
@@ -40,13 +39,15 @@ router.post("/register", (req, res) => {
                 .then((user) => {
                   res
                     .status(201)
-                    .json({ userCreated: "user has been registered" });
+                    .json({ message: "User has been successfully registered" });
                 })
-                .catch((err) => console.log(err));
+                .catch((error) =>
+                  console.log(`Error during registration: ${error}`)
+                );
             });
           });
         } catch (error) {
-          console.log(`${error}`);
+          console.log(`Error during hashing process: ${error}`);
         }
       }
     })
@@ -68,9 +69,7 @@ router.post("/login", (req, res) => {
           .compare(password, user.password)
           .then((correctPassword) => {
             if (!correctPassword) {
-              return res
-                .status(401)
-                .json({ emailLoginMessage: "User login failure" });
+              return res.status(401).json({ message: "User login failure" });
             }
 
             const payload = {
@@ -79,6 +78,7 @@ router.post("/login", (req, res) => {
               email: user.email,
             };
 
+            // Generate jwt token and send it back to client
             jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
               res.json({
                 success: true,
@@ -87,16 +87,14 @@ router.post("/login", (req, res) => {
             });
           })
           .catch((error) => {
-            console.log(error);
+            console.log(`Error with passwords: ${error}`);
           });
       } else {
-        return res
-          .status(404)
-          .json({ emailRegistrationError: "Email doesn't exists" });
+        return res.status(404).json({ message: "Email doesn't exists" });
       }
     })
     .catch((error) => {
-      console.log(error);
+      console.log(`Error while login: ${error}`);
     });
 });
 
@@ -130,9 +128,8 @@ router.post(
     const oldPassword = req.body.oldPassword;
     let newPassword = req.body.password;
 
-   UserRegSchema.find({ "email" : userEmail }).then((user) => {
+    UserRegSchema.find({ email: userEmail }).then((user) => {
       if (user) {
-        console.log(user);
         bcrypt
           .compare(oldPassword, user[0].password)
           .then((correctPassword) => {
@@ -148,20 +145,32 @@ router.post(
               bcrypt.hash(newPassword, salt, function (hasherr, hash) {
                 if (hasherr) throw hasherr;
                 newPassword = hash;
-                console.log(newPassword);
 
                 // Update the password in the database
                 UserRegSchema.updateOne(
                   { email: userEmail },
                   { $set: { password: newPassword } }
-                );
+                )
+                  .then((data) => {
+                    if (!data) {
+                      res.status(404).send({
+                        message: `Cannot update the password`,
+                      });
+                    } else
+                      res.send({
+                        message: "Password was updated successfully.",
+                      });
+                  })
+                  .catch((err) => {
+                    res.status(500).send({
+                      message: "Error updating password=" + err,
+                    });
+                  });
               });
-              res.status(200).json({ status: "Your password updated sucessfully" });
             });
-            
           })
           .catch((error) => {
-            console.log(error);
+            console.log(`Error with the user object ${error}`);
           });
       } else {
         return res
