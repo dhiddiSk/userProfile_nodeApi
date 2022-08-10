@@ -24,3 +24,6 @@ This is an API project which facilitates users to Register, Login, update user l
 3. Replace the `mongoURL` in contants.js file with your own mongoDB url.
 4. Launch the api from the root of the project folder using command `node index.js`.
 5. Then make the calls to the api using postman tool.
+
+## note: 
+This project is only for learning purpose.
