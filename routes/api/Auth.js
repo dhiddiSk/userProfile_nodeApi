@@ -12,15 +12,17 @@ const jwtTokenGeneration = function (payload) {
   return token;
 };
 
-const registrationSucess = async function (payload, res) {
-  const newUserPayload = payload;
+const registration = async function (req, res) {
+  const newUser = new UserRegSchema({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    userName: req.body.userName,
+  });
   const salt = await bcrypt.genSalt(10);
-  const hashpassword = await bcrypt.hash(newUserPayload.password, salt);
-  newUserPayload.password = hashpassword;
-
-  console.log(`payload saved in DB ${newUserPayload}`);
-
-  const userSignup = await newUserPayload.save();
+  const hashpassword = await bcrypt.hash(newUser.password, salt);
+  newUser.password = hashpassword;
+  const userSignup = await newUser.save();
 
   const payloadForJwt = {
     id: userSignup.id,
@@ -35,18 +37,6 @@ const registrationSucess = async function (payload, res) {
   });
 };
 
-const userLoginSucess = async function (payload, res) {
-// Generate jwt token and send it back to client
-jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
-  res.json({
-    success: true,
-    token: token,
-  });
-});
-
-
-};
-
 // @type    POST
 // @route   /api/auth/register
 // @desc    route for registration of users
@@ -59,14 +49,7 @@ router.post("/register", (req, res) => {
         res.status(404).json({ message: "Entered email already exists" });
       } else {
         // If email doesn't exists in records
-        const newUser = new UserRegSchema({
-          name: req.body.name,
-          email: req.body.email,
-          password: req.body.password,
-          userName: req.body.userName,
-        });
-
-        registrationSucess(newUser, res);
+        registration(req, res);
       }
     })
     .catch((error) => console.log(`Registration error: ${error}`));
@@ -96,7 +79,13 @@ router.post("/login", (req, res) => {
               email: user.email,
             };
 
-            userLoginSucess(payload, res);
+            // Generate jwt token and send it back to client
+            jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
+              res.json({
+                success: true,
+                token: token,
+              });
+            });
           })
           .catch((error) => {
             console.log(`Error with passwords: ${error}`);
