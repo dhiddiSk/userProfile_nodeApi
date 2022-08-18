@@ -7,6 +7,46 @@ import passport from "passport";
 
 export const router = express.Router();
 
+const jwtTokenGeneration = function (payload) {
+  const token = jsonwt.sign(payload, secret, { expiresIn: 3600 });
+  return token;
+};
+
+const registrationSucess = async function (payload, res) {
+  const newUserPayload = payload;
+  const salt = await bcrypt.genSalt(10);
+  const hashpassword = await bcrypt.hash(newUserPayload.password, salt);
+  newUserPayload.password = hashpassword;
+
+  console.log(`payload saved in DB ${newUserPayload}`);
+
+  const userSignup = await newUserPayload.save();
+
+  const payloadForJwt = {
+    id: userSignup.id,
+    name: newUserPayload.name,
+    email: newUserPayload.email,
+  };
+
+  const jwtToken = await jwtTokenGeneration(payloadForJwt);
+  res.status(200).json({
+    success: true,
+    token: jwtToken,
+  });
+};
+
+const userLoginSucess = async function (payload, res) {
+// Generate jwt token and send it back to client
+jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
+  res.json({
+    success: true,
+    token: token,
+  });
+});
+
+
+};
+
 // @type    POST
 // @route   /api/auth/register
 // @desc    route for registration of users
@@ -18,7 +58,7 @@ router.post("/register", (req, res) => {
       if (user) {
         res.status(404).json({ message: "Entered email already exists" });
       } else {
-        // If email exists in records
+        // If email doesn't exists in records
         const newUser = new UserRegSchema({
           name: req.body.name,
           email: req.body.email,
@@ -26,29 +66,7 @@ router.post("/register", (req, res) => {
           userName: req.body.userName,
         });
 
-        try {
-          bcrypt.genSalt(10, function (err, salt) {
-            // hashing the password
-            bcrypt.hash(newUser.password, salt, function (hasherr, hash) {
-              if (hasherr) throw hasherr;
-              newUser.password = hash;
-
-              //Save the data to database
-              newUser
-                .save()
-                .then((user) => {
-                  res
-                    .status(201)
-                    .json({ message: "User has been successfully registered" });
-                })
-                .catch((error) =>
-                  console.log(`Error during registration: ${error}`)
-                );
-            });
-          });
-        } catch (error) {
-          console.log(`Error during hashing process: ${error}`);
-        }
+        registrationSucess(newUser, res);
       }
     })
     .catch((error) => console.log(`Registration error: ${error}`));
@@ -78,13 +96,7 @@ router.post("/login", (req, res) => {
               email: user.email,
             };
 
-            // Generate jwt token and send it back to client
-            jsonwt.sign(payload, secret, { expiresIn: 3600 }, (err, token) => {
-              res.json({
-                success: true,
-                token: token,
-              });
-            });
+            userLoginSucess(payload, res);
           })
           .catch((error) => {
             console.log(`Error with passwords: ${error}`);
