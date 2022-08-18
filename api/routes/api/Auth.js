@@ -155,16 +155,16 @@ router.post(
                   .then((data) => {
                     if (!data) {
                       res.status(404).send({
-                        message: `Cannot update the password`,
+                        passwordUpdateMessage: `Cannot update the password`,
                       });
                     } else
                       res.send({
-                        message: "Password was updated successfully.",
+                        passwordUpdateMessage: "Password was updated successfully.",
                       });
                   })
                   .catch((err) => {
                     res.status(500).send({
-                      message: "Error updating password=" + err,
+                      passwordUpdateMessage: "Error updating password=" + err,
                     });
                   });
               });
