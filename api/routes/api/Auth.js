@@ -26,8 +26,8 @@ const registration = async function (req, res) {
 
   const payloadForJwt = {
     id: userSignup.id,
-    name: newUserPayload.name,
-    email: newUserPayload.email,
+    name: userSignup.name,
+    email: userSignup.email,
   };
 
   const jwtToken = await jwtTokenGeneration(payloadForJwt);
