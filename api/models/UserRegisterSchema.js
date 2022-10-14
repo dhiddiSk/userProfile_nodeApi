@@ -27,6 +27,8 @@ const userRegisterSchema = new Schema({
   },
 });
 
+// Use full name for variables. Reg here can mean many more things.
+// Always better to be implicit
 const UserReg = mongoose.model("newUserReg", userRegisterSchema);
 
 export default UserReg;

@@ -7,11 +7,25 @@ import passport from "passport";
 
 export const router = express.Router();
 
+// This function should be a service.
+// Something `services/auth.js` and export functions from this service
 const jwtTokenGeneration = function (payload) {
-  const token = jsonwt.sign(payload, secret, { expiresIn: 3600 });
-  return token;
+  // You can return directly the result of `sign` since you won't be doing
+  // anything with `token` function
+  return jsonwt.sign(payload, secret, { expiresIn: 3600 });
 };
 
+// 1. The name of the function doesn't tell me what exactly this does.
+//    I have to read what's inside of the function for me to understand what it does.
+// 2. This function should be in a service. Think of a service as a piece of code that you can
+//    reuse in any other place, therefore it needs to be descriptive enough.
+//    From what I understand this means that you want to create a user and generate a JWT token.
+//    You can call this function `registerUser`
+// 3. This function is breaking the principle of `single responsibility` of SOLID's approach
+//    (see https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english)
+//    I would break this into two functions:
+//      1. createUser
+//      2. createJwtTokenForUser
 const registration = async function (req, res) {
   const newUser = new UserRegSchema({
     name: req.body.name,
@@ -24,18 +38,95 @@ const registration = async function (req, res) {
   newUser.password = hashpassword;
   const userSignup = await newUser.save();
 
-  const payloadForJwt = {
+  // No need to store this as a variable.
+  // Only store things in variables if you are going to re-use them in other places.
+  // You are only using this in a single place, therefore just pass the object directly to it.
+  const jwtToken = await jwtTokenGeneration({
     id: userSignup.id,
     name: userSignup.name,
     email: userSignup.email,
-  };
+  });
 
-  const jwtToken = await jwtTokenGeneration(payloadForJwt);
   res.status(200).json({
     success: true,
     token: jwtToken,
   });
 };
+
+// Over here I will talk a bit more about the function that you wrote on the top and most likely will do a new one.
+// Imagine that you create a new service called `Auth.js` and this service exports a function called `registerUser`.
+// Me, as a developer that will call this function I want this to be as simple as possible.
+// In your function above you are telling that when I call `registration` function I need to pass
+// a `request` and a `response` that comes from `express`.
+// Now, imagine the following feature request:
+// User can invite another user. As soon as this user invite another user, we register this user in our system.
+// There are a couple of problems here:
+//    1. You might call this function from another part of your application that doesn't have `request` and `response` available to you from express
+//    2. Inside the function above you are doing `res.status(200)` which is doing two things inside the same function. Again, breaking single responsibility principle
+// Now, lets do a high overview on how you could break the function above to be more re-usable
+const saltPassword = async function (password) {
+  return await bcrypt.genSalt(10);
+}
+
+const createUser = async function(user) {
+  const newUser = new UserRegSchema({
+    name: user.name,
+    email: user.email,
+    password: user.password,
+    userName: user.userName,
+  });
+
+  newUser.password = await bcrypt.hash(newUser.password, saltPassword(user.password));
+
+  return await newUser.save();
+}
+
+const registerUser = async function (user) {
+  const createdUser = createUser(user);
+
+  const jwtToken = await jwtTokenGeneration({
+    id: createdUser.id,
+    name: createdUser.name,
+    email: createdUser.email,
+  });
+
+  return {
+    jwtToken,
+    createdUser,
+  }
+}
+
+const userExist = async function (email) {
+  // Not sure if it returns undefined or not here. Please, check
+  return (await UserRegSchema.findOne({ email })) !== undefined;
+}
+
+// Notice how we moved the logic to create a user to a much simpler way where we only need
+// to pass what the function needs - the user details and not the entire response from express.
+// This allows the `registerUser` function to be called from many other places and not only from an
+// express route
+router.post('/register', async (request, response) => {
+  // @TODO: We still need to validate the request here. Will leave this one up to you
+
+  if (await userExist(request.body.email)) {
+    // The number 401 is an http code that is a constant. Therefore you should use constants.
+    // Either you can define them yourself e.g. const HTTP_CODES = { OK: 200, ... }
+    // or you can use some packages that already have that: https://www.npmjs.com/package/http-status-codes
+    response.status(401).json({ error: 'User already exist' });
+  }
+
+  try {
+    const data = await registerUser(request.body);
+
+    // No need to pass "error: false" because the http code already tells
+    // that the response is okay - 201 means "Server responded good and a resource was created"
+    response.status(201).json({ token: data.jwtToken });
+  } catch (e) {
+    // No need to pass "error: true" because the http code already tells
+    // that the response is okay - 500 means "Server error"
+    response.status(500).json({ error: 'Error trying to create user' });
+  }
+});
 
 // @type    POST
 // @route   /api/auth/register

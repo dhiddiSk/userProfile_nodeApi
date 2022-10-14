@@ -13,9 +13,12 @@ const mimeTypes = {
     'jpg': 'image/jpg'
 };
 
+// these should be enviromental variables
 const port = 5000;
 const hostName = '127.0.0.1';
 
+// Format your files correctly. Not formatting your files show lack of discipline
+// Check https://prettier.io/
 http.createServer((req, res) => {
     let myUri = url.parse(req.url).pathname;
     let filename = path.join(process.cwd(), unescape(myUri));
@@ -26,8 +29,8 @@ http.createServer((req, res) => {
         res.writeHead(404, {'Content-Type': 'text/plain'});
         res.write('page not found');
         res.end();
-    }   
-    
+    }
+
     if(loadFile.isFile()){
         var mimeType = mimeTypes[(path.extname(filename)).split('.').reverse()[0]];
         res.writeHead(200, {'Content-Type' : mimeType})
