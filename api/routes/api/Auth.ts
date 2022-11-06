@@ -25,7 +25,7 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req: userRegistrationPayload, res) {
+const registration = async function (req, res) {
   const newUser = new UserReg({
     name: req.body.name,
     email: req.body.email,
