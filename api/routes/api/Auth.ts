@@ -2,17 +2,30 @@ import { UserReg } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcryptjs'
 import jsonwt from 'jsonwebtoken'
-import { secret } from '../../setup/constants.js'
+import { secret } from '../../setup/constants'
 import passport from 'passport'
 
 export const router = express.Router()
 
-const jwtTokenGeneration = function (payload) {
+type jwtTokenPayload = {
+  id: string,
+  name: string,
+  email: string
+}
+
+type userRegistrationPayload = {
+  name: string,
+  email: string,
+  password: string,
+  userName: string
+}
+
+const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   const token = jsonwt.sign(payload, secret, { expiresIn: 3600 })
   return token
 }
 
-const registration = async function (req, res) {
+const registration = async function (req: userRegistrationPayload, res) {
   const newUser = new UserReg({
     name: req.body.name,
     email: req.body.email,
