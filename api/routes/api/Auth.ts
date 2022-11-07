@@ -13,12 +13,6 @@ type jwtTokenPayload = {
   email: string
 }
 
-type userRegistrationPayload = {
-  name: string,
-  email: string,
-  password: string,
-  userName: string
-}
 
 const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   const token = jsonwt.sign(payload, secret, { expiresIn: 3600 })
@@ -120,7 +114,7 @@ router.post('/login', (req, res) => {
 router.get(
   '/profile',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
+  (req: any, res: any) => {
     res.status(200).json({
       id: req.user.id,
       name: req.user.name,
