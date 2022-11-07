@@ -5,7 +5,7 @@ import passport from 'passport'
 import { router } from './routes/api/Auth'
 import { passportStrategy } from './strategies/passport'
 import {
-  mongoURL,
+  mongoDatabaseURL,
   userProfileApplicationPortNumber
 } from './setup/constants'
 
@@ -16,7 +16,7 @@ application.use(bodyParser.json())
 
 // Connecting to the database
 mongoose
-  .connect(mongoURL)
+  .connect(mongoDatabaseURL)
   .then(() => {
     console.log('mongoDB has been connected successfully')
   })

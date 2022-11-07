@@ -1,8 +1,8 @@
-import { UserReg } from '../../models/UserRegisterSchema'
+import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcryptjs'
 import jsonwt from 'jsonwebtoken'
-import { secret } from '../../setup/constants'
+import { passportSecretCode } from '../../setup/constants'
 import passport from 'passport'
 
 export const router = express.Router()
@@ -15,12 +15,12 @@ type jwtTokenPayload = {
 
 
 const jwtTokenGeneration = function (payload: jwtTokenPayload) {
-  const token = jsonwt.sign(payload, secret, { expiresIn: 3600 })
+  const token = jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 })
   return token
 }
 
 const registration = async function (req, res) {
-  const newUser = new UserReg({
+  const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
@@ -50,7 +50,7 @@ const registration = async function (req, res) {
 // @access  PUBLIC
 
 router.post('/register', (req, res) => {
-  UserReg.findOne({ email: req.body.email })
+  UserRegistration.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
         res.status(404).json({ message: 'Entered email already exists' })
@@ -68,13 +68,13 @@ router.post('/register', (req, res) => {
 // @access  PUBLIC
 
 router.post('/login', (req, res) => {
-  const password = req.body.password
-  const email = req.body.email
-  UserReg.findOne({ email })
+  const loginPassword = req.body.password
+  const loginEmail = req.body.email
+  UserRegistration.findOne({ loginEmail })
     .then((user) => {
       if (user) {
         bcrypt
-          .compare(password, user.password)
+          .compare(loginPassword, user.password)
           .then((correctPassword) => {
             if (!correctPassword) {
               return res.status(401).json({ message: 'User login failure' })
@@ -87,7 +87,7 @@ router.post('/login', (req, res) => {
             }
 
             // Generate jwt token and send it back to client
-            jsonwt.sign(payload, secret, { expiresIn: 3600 }, (_err, token) => {
+            jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 }, (_err, token) => {
               res.json({
                 success: true,
                 token
@@ -136,7 +136,7 @@ router.post(
     const oldPassword : string = req.body.oldPassword
     let newPassword : string = req.body.password
 
-    UserReg.find({ email: userEmail }).then((user) => {
+    UserRegistration.find({ email: userEmail }).then((user) => {
       if (user) {
         bcrypt
           .compare(oldPassword, user[0].password)
@@ -155,7 +155,7 @@ router.post(
                 newPassword = hash
 
                 // Update the password in the database
-                UserReg.updateOne(
+                UserRegistration.updateOne(
                   { email: userEmail },
                   { $set: { password: newPassword } }
                 )

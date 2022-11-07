@@ -7,7 +7,7 @@ const extractJwt = passJwt.ExtractJwt
 
 const options = {}
 options.jwtFromRequest = extractJwt.fromAuthHeaderAsBearerToken()
-options.secretOrKey = constant.secret
+options.secretOrKey = constant.passportSecretCode
 
 // passport strategy used by application for authenticating a request
 
