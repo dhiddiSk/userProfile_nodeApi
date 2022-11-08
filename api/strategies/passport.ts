@@ -1,12 +1,12 @@
 import passJwt from 'passport-jwt'
-import * as constant from '../setup/constants.js'
+import * as constant from '../setup/constants'
 import mongoose from 'mongoose'
 const UserReg = mongoose.model('newUserReg')
 const JwtStrategy = passJwt.Strategy
 const extractJwt = passJwt.ExtractJwt
 
 
-const option: {jwtFromRequest: string, secretOrKey: string} = {
+const option: {jwtFromRequest: any, secretOrKey: string} = {
   jwtFromRequest: extractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: constant.passportSecretCode
 };
