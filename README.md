@@ -7,7 +7,7 @@ This is an API project which facilitates users to Register, Login, update user l
 1. NodeJS
 2. ExpressJS
 3. MongoDB
-4. Libraries("bcryptjs", "body-parser", "express", "jsonwebtoken", "mongoose", "passport", "passport-jwt", "validator")
+4. Libraries("bcrypt", "body-parser", "nodemon", "express", "jsonwebtoken", "mongoose", "passport", "passport-jwt", "validator")
 
 ## Endpoints:
 
@@ -22,7 +22,7 @@ This is an API project which facilitates users to Register, Login, update user l
 1. Clone the project to your local machine.
 2. Install the required dependencies using `npm` package manager.
 3. Replace the `mongoURL` in contants.js file with your own mongoDB url.
-4. Launch the api from the root of the project folder using command `node index.js`.
+4. Launch the api from the root of the project folder using command `npm run dev`.
 5. Then make the calls to the api using postman tool.
 
 ## note: 

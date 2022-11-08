@@ -2,12 +2,12 @@ import express from 'express'
 import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import passport from 'passport'
-import { router } from './routes/api/Auth.js'
-import { passportStrategy } from './strategies/passport.js'
+import { router } from './routes/api/Auth'
+import { passportStrategy } from './strategies/passport'
 import {
-  mongoURL,
+  mongoDatabaseURL,
   userProfileApplicationPortNumber
-} from './setup/constants.js'
+} from './setup/constants'
 
 const application = express()
 
@@ -16,7 +16,7 @@ application.use(bodyParser.json())
 
 // Connecting to the database
 mongoose
-  .connect(mongoURL)
+  .connect(mongoDatabaseURL)
   .then(() => {
     console.log('mongoDB has been connected successfully')
   })

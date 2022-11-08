@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 // Basic schema for the user registration
-const userRegisterSchema = new Schema({
+const userRegistrationSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -27,6 +27,6 @@ const userRegisterSchema = new Schema({
   }
 })
 
-const UserReg = mongoose.model('newUserReg', userRegisterSchema)
+const UserRegistration = mongoose.model('newUserRegistration', userRegistrationSchema)
 
-export { UserReg }
+export { UserRegistration }
