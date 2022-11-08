@@ -1,6 +1,6 @@
 import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
 import { passportSecretCode } from '../../setup/constants'
 import passport from 'passport'
@@ -19,13 +19,14 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req, res) {
+const registration = async function (req: any, res: any) {
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
     userName: req.body.userName
   })
+
   const salt = await bcrypt.genSalt(10)
   const hashpassword = await bcrypt.hash(newUser.password, salt)
   newUser.password = hashpassword

@@ -1,7 +1,7 @@
 import passJwt from 'passport-jwt'
 import * as constant from '../setup/constants'
 import mongoose from 'mongoose'
-const UserReg = mongoose.model('newUserReg')
+const UserReg = mongoose.model('newUserRegistration')
 const JwtStrategy = passJwt.Strategy
 const extractJwt = passJwt.ExtractJwt
 
