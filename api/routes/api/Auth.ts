@@ -2,7 +2,9 @@ import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
-import { passportSecretCode } from '../../setup/constants'
+//import { passportSecretCode } from '../../setup/constants'
+import * as dotenv from 'dotenv'
+dotenv.config();
 import passport from 'passport'
 
 export const router = express.Router()
@@ -15,7 +17,7 @@ type jwtTokenPayload = {
 
 
 const jwtTokenGeneration = function (payload: jwtTokenPayload) {
-  const token = jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 })
+  const token = jsonwt.sign(payload, process.env.passportSecretCode, { expiresIn: 3600 })
   return token
 }
 
@@ -88,7 +90,7 @@ router.post('/login', (req, res) => {
             }
 
             // Generate jwt token and send it back to client
-            jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 }, (_err, token) => {
+            jsonwt.sign(payload, process.env.passportSecretCode, { expiresIn: 3600 }, (_err, token) => {
               res.json({
                 success: true,
                 token
