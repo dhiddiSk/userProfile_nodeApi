@@ -22,11 +22,17 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
+    "module-alias": "^2.2.2",
     "mongoose": "^6.7.1",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "ts-node": "^10.9.1"
+  },
+  "_moduleAliases": {
+    "@models": "build/models/*",
+    "@authRoutes": "build/routes/authApi/*",
+    "@strategies": "build/strategies/*"
   }
 }

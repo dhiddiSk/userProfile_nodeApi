@@ -4,12 +4,10 @@ const UserReg = mongoose.model('newUserRegistration')
 const JwtStrategy = passJwt.Strategy
 const extractJwt = passJwt.ExtractJwt
 
-
 const option: {jwtFromRequest: any, secretOrKey: string} = {
   jwtFromRequest: extractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.passportSecretCode
 };
-
 
 // passport strategy used by application for authenticating a request
 const passportStrategy = (passport) => {
