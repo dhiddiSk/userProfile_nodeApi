@@ -5,7 +5,7 @@ import jsonwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'
-import { jwtTokenPayload } from '../../services/typesServices'
+import { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload } from '../../services/typesServices'
 
 export const router = express.Router()
 
@@ -14,7 +14,7 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req: any, res: any) {
+const registration = async function (req: userRegistrationRequestPayload, res: userRegistrationResponsePayload) {
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
