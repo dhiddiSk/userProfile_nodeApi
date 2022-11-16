@@ -2,7 +2,7 @@ import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
-//import { passportSecretCode } from '../../setup/constants'
+import { env } from 'process';
 import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'

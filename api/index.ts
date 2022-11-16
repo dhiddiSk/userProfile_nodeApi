@@ -4,10 +4,6 @@ import bodyParser from 'body-parser'
 import passport from 'passport'
 import { router } from './routes/api/Auth'
 import { passportStrategy } from './strategies/passport'
-import {
-  mongoDatabaseURL,
-  userProfileApplicationPortNumber
-} from './setup/constants'
 
 const application = express()
 
@@ -16,7 +12,7 @@ application.use(bodyParser.json())
 
 // Connecting to the database
 mongoose
-  .connect(mongoDatabaseURL)
+  .connect(process.env.mongoDatabaseURL)
   .then(() => {
     console.log('mongoDB has been connected successfully')
   })
@@ -35,8 +31,8 @@ application.get('/', (req, res) => {
   res.send('Welcome to user registration application')
 })
 
-application.listen(userProfileApplicationPortNumber, () => {
+application.listen(process.env.userProfileApplicationPortNumber, () => {
   console.log(
-    `Application is listening on port ${userProfileApplicationPortNumber}`
+    `Application is listening on port ${process.env.userProfileApplicationPortNumber}`
   )
 })
