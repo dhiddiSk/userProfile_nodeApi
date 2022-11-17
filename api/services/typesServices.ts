@@ -1,5 +1,3 @@
-import { type } from "os"
-
 type jwtTokenPayload = {
     id: string,
     name: string,
@@ -7,7 +5,6 @@ type jwtTokenPayload = {
   }
 
 type userRegistrationRequestPayload = {
-    body: any,
     name: string,
     email: string,
     password: string,
@@ -15,10 +12,10 @@ type userRegistrationRequestPayload = {
   }
 
 type userRegistrationResponsePayload = {
+  status: number
   success: boolean,
   token: string
 }
-
 
 
 export { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload }
