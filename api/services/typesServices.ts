@@ -26,5 +26,14 @@ interface userLoginResponsePayload {
   token: string
 }
 
+interface userProfileRequestPayload {
+
+}
+
+interface userProfileResponsePayload {
+  
+}
+
+
 
 export { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload, userLoginResponsePayload, userLoginRequestPayload  }
