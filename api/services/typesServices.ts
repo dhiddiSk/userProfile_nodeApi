@@ -4,18 +4,27 @@ type jwtTokenPayload = {
     email: string
   }
 
-type userRegistrationRequestPayload = {
-    name: string,
-    email: string,
-    password: string,
-    userName: string
-  }
+interface userRegistrationResponsePayload {
+  success: boolean,
+  token: string
+}
 
-type userRegistrationResponsePayload = {
-  status: number
+interface userRegistrationRequestPayload {
+  name: string,
+  email: string,
+  password: string,
+  userName: string
+}
+
+interface userLoginRequestPayload {
+  email: string,
+  password: string
+}
+
+interface userLoginResponsePayload {
   success: boolean,
   token: string
 }
 
 
-export { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload }
+export { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload, userLoginResponsePayload, userLoginRequestPayload  }

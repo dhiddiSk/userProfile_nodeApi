@@ -5,7 +5,8 @@ import jsonwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'
-import { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload } from '../../services/typesServices'
+import { Request, Response } from 'express';
+import { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload, userLoginRequestPayload } from '../../services/typesServices'
 
 export const router = express.Router()
 
@@ -14,7 +15,7 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req: userRegistrationRequestPayload, res: userRegistrationResponsePayload) {
+const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res: Response<userRegistrationResponsePayload>) {
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
@@ -45,7 +46,7 @@ const registration = async function (req: userRegistrationRequestPayload, res: u
 // @desc    route for registration of users
 // @access  PUBLIC
 
-router.post('/register', (req, res) => {
+router.post('/register', (req: Request<{}, {}, userRegistrationRequestPayload>, res) => {
   UserRegistration.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
@@ -63,7 +64,7 @@ router.post('/register', (req, res) => {
 // @desc    route for login of registered users
 // @access  PUBLIC
 
-router.post('/login', (req, res) => {
+router.post('/login', (req: Request<{}, {},userLoginRequestPayload>, res) => {
   const loginPassword = req.body.password
   const loginEmail = req.body.email
   UserRegistration.findOne({ loginEmail })
