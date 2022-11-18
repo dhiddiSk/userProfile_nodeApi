@@ -1,4 +1,4 @@
-import { UserRegistration } from '../../models/UserRegisterSchema'
+import { UserRegistration } from '@models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
