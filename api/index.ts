@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import passport from 'passport'
 import { router } from '@authRoutes/Auth'
-import { passportStrategy } from '@strategies//passport'
+import { passportStrategy } from '@strategies/passport'
 import 'module-alias/register';
 const application = express()
 

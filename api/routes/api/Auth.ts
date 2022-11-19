@@ -5,8 +5,8 @@ import jsonwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'
-import { Request, Response } from 'express';
-import { jwtTokenPayload, userRegistrationRequestPayload, userRegistrationResponsePayload, userLoginRequestPayload } from '../../services/typesServices'
+import { Request } from 'express';
+import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '@services/typesServices'
 
 export const router = express.Router()
 
@@ -15,7 +15,7 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res: Response<userRegistrationResponsePayload>) {
+const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res) {
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
@@ -41,12 +41,53 @@ const registration = async function (req: Request<{}, {}, userRegistrationReques
   })
 }
 
+
+// Update the password in the database
+const updatePasswordInDatabase = function(userEmail, UserRegistration, newPassword, res){
+
+  UserRegistration.updateOne(
+    { email: userEmail },
+    { $set: { password: newPassword } }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          passwordUpdateMessage: 'Cannot update the password'
+        })
+      } else {
+        res.send({
+          passwordUpdateMessage: 'Password was updated successfully.'
+        })
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        passwordUpdateMessage: 'Error updating password=' + err
+      })
+    })
+
+}
+
+
+// Generate hash of new password
+const  generateHashPassword = function(UserRegistration, newPassword, userEmail, res){
+  bcrypt.genSalt(10, function (_err, salt) {
+    bcrypt.hash(newPassword, salt, function (hasherr, hash) {
+      if (hasherr) throw hasherr
+      newPassword = hash
+      updatePasswordInDatabase(userEmail, UserRegistration, newPassword, res);
+      
+    })
+  })
+}
+
+
 // @type    POST
 // @route   /api/auth/register
 // @desc    route for registration of users
 // @access  PUBLIC
 
-router.post('/register', (req: Request<{}, {}, userRegistrationRequestPayload>, res) => {
+router.post('/register', (req: Request<userRegistrationRequestPayload>, res) => {
   UserRegistration.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
@@ -76,19 +117,15 @@ router.post('/login', (req: Request<{}, {},userLoginRequestPayload>, res) => {
             if (!correctPassword) {
               return res.status(401).json({ message: 'User login failure' })
             }
-
             const payload = {
               id: user.id,
               name: user.name,
               email: user.email
             }
-
-            // Generate jwt token and send it back to client
-            jsonwt.sign(payload, process.env.passportSecretCode, { expiresIn: 3600 }, (_err, token) => {
-              res.json({
-                success: true,
-                token
-              })
+            let token = jwtTokenGeneration(payload);
+            res.json({
+              success: true,
+              token
             })
           })
           .catch((error) => {
@@ -104,18 +141,18 @@ router.post('/login', (req: Request<{}, {},userLoginRequestPayload>, res) => {
 })
 
 // @type    GET
-// @route    /api/auth/profile
+// @route   /api/auth/profile
 // @desc    route for user profile
 // @access  PRIVATE (authenticated using jwt token)
 
 router.get(
   '/profile',
   passport.authenticate('jwt', { session: false }),
-  (req: any, res: any) => {
+  (req: Request<{}, {},jwtTokenPayload>, res) => {
     res.status(200).json({
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email
+      id: req.body.id,
+      name: req.body.name,
+      email: req.body.email
     })
   }
 )
@@ -144,36 +181,9 @@ router.post(
                 .json({ profileUpdate: 'Your old password does not match' })
             }
 
-            // Generated hash of the new password
+            // Generated hash of the new password and Update in the database
+            generateHashPassword(UserRegistration, newPassword, userEmail, res);
 
-            bcrypt.genSalt(10, function (_err, salt) {
-              bcrypt.hash(newPassword, salt, function (hasherr, hash) {
-                if (hasherr) throw hasherr
-                newPassword = hash
-
-                // Update the password in the database
-                UserRegistration.updateOne(
-                  { email: userEmail },
-                  { $set: { password: newPassword } }
-                )
-                  .then((data) => {
-                    if (!data) {
-                      res.status(404).send({
-                        passwordUpdateMessage: 'Cannot update the password'
-                      })
-                    } else {
-                      res.send({
-                        passwordUpdateMessage: 'Password was updated successfully.'
-                      })
-                    }
-                  })
-                  .catch((err) => {
-                    res.status(500).send({
-                      passwordUpdateMessage: 'Error updating password=' + err
-                    })
-                  })
-              })
-            })
           })
           .catch((error) => {
             console.log(`Error with the user object ${error}`)
