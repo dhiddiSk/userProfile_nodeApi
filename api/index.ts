@@ -2,9 +2,9 @@ import express from 'express'
 import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import passport from 'passport'
-import { router } from 'routes/api/Auth'
-import { passportStrategy } from 'strategies/passport'
-import 'module-alias/register';
+import { router } from './routes/api/Auth'
+import { passportStrategy } from './strategies/passport'
+import 'module-alias/register'
 const application = express()
 
 application.use(bodyParser.urlencoded({ extended: false }))

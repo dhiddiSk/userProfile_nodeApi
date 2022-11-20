@@ -1,4 +1,4 @@
-import { UserRegistration } from 'models/UserRegisterSchema'
+import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'
 import { Request } from 'express';
-import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from 'services/typesServices'
+import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '../../services/typesServices'
 
 export const router = express.Router()
 
@@ -43,7 +43,7 @@ const registration = async function (req: Request<{}, {}, userRegistrationReques
 
 
 // Update the password in the database
-const updatePasswordInDatabase = function(userEmail, UserRegistration, newPassword, res){
+const updatePasswordInDatabase = function(userEmail: string, UserRegistration, newPassword: string, res){
 
   UserRegistration.updateOne(
     { email: userEmail },
@@ -70,7 +70,7 @@ const updatePasswordInDatabase = function(userEmail, UserRegistration, newPasswo
 
 
 // Generate hash of new password
-const  generateHashPassword = function(UserRegistration, newPassword, userEmail, res){
+const  generateHashPassword = function(UserRegistration, newPassword:string, userEmail:string, res){
   bcrypt.genSalt(10, function (_err, salt) {
     bcrypt.hash(newPassword, salt, function (hasherr, hash) {
       if (hasherr) throw hasherr
