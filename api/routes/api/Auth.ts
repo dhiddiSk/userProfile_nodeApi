@@ -11,7 +11,7 @@ import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayloa
 export const router = express.Router()
 
 const jwtTokenGeneration = function (payload: jwtTokenPayload) {
-  const token = jsonwt.sign(payload, process.env.passportSecretCode, { expiresIn: 3600 })
+  const token = jsonwt.sign(payload, process.env.passportSecretCode!, { expiresIn: 3600 })
   return token
 }
 

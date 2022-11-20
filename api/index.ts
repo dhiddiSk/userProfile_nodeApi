@@ -12,7 +12,7 @@ application.use(bodyParser.json())
 
 // Connecting to the database
 mongoose
-  .connect(process.env.mongoDatabaseURL)
+  .connect(process.env.mongoDatabaseURL!)
   .then(() => {
     console.log('mongoDB has been connected successfully')
   })
