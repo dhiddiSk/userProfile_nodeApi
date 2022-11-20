@@ -1,4 +1,4 @@
-import { UserRegistration } from '../../models/UserRegisterSchema'
+import { UserRegistration } from '@models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv'
 dotenv.config();
 import passport from 'passport'
 import { Request } from 'express';
-import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '../../services/typesServices'
+import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '@services/typesServices'
 
 export const router = express.Router()
 
