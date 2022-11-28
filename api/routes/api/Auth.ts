@@ -7,6 +7,7 @@ dotenv.config();
 import passport from 'passport'
 import { Request } from 'express';
 import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '../../services/typesServices'
+import { body } from 'express-validator'
 
 export const router = express.Router()
 
@@ -15,7 +16,7 @@ const jwtTokenGeneration = function (payload: jwtTokenPayload) {
   return token
 }
 
-const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res) {
+const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res) {  
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
@@ -87,7 +88,7 @@ const  generateHashPassword = function(UserRegistration, newPassword:string, use
 // @desc    route for registration of users
 // @access  PUBLIC
 
-router.post('/register', (req: Request<userRegistrationRequestPayload>, res) => {
+router.post('/register', body('email').isEmail(),(req: Request<userRegistrationRequestPayload>, res) => {
   UserRegistration.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
@@ -105,7 +106,7 @@ router.post('/register', (req: Request<userRegistrationRequestPayload>, res) => 
 // @desc    route for login of registered users
 // @access  PUBLIC
 
-router.post('/login', (req: Request<{}, {},userLoginRequestPayload>, res) => {
+router.post('/login', body('email').isEmail(),(req: Request<{}, {},userLoginRequestPayload>, res) => {
   const loginPassword = req.body.password
   const loginEmail = req.body.email
   UserRegistration.findOne({ loginEmail })

@@ -7,7 +7,7 @@ This is an API project which facilitates users to Register, Login, update user l
 1. NodeJS
 2. ExpressJS
 3. MongoDB
-4. Libraries("bcrypt", "body-parser", "nodemon", "express", "jsonwebtoken", "mongoose", "passport", "passport-jwt", "validator")
+4. Libraries("bcrypt", "body-parser", "nodemon", "express", "jsonwebtoken", "mongoose", "passport", "passport-jwt", "express-validator")
 
 ## Endpoints:
 
