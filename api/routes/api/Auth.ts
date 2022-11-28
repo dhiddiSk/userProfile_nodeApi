@@ -2,24 +2,21 @@ import { UserRegistration } from '../../models/UserRegisterSchema'
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jsonwt from 'jsonwebtoken'
-import { passportSecretCode } from '../../setup/constants'
+import * as dotenv from 'dotenv'
+dotenv.config();
 import passport from 'passport'
+import { Request } from 'express';
+import { jwtTokenPayload, userRegistrationRequestPayload, userLoginRequestPayload } from '../../services/typesServices'
+import { body } from 'express-validator'
 
 export const router = express.Router()
 
-type jwtTokenPayload = {
-  id: string,
-  name: string,
-  email: string
-}
-
-
 const jwtTokenGeneration = function (payload: jwtTokenPayload) {
-  const token = jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 })
+  const token = jsonwt.sign(payload, process.env.passportSecretCode!, { expiresIn: 3600 })
   return token
 }
 
-const registration = async function (req: any, res: any) {
+const registration = async function (req: Request<{}, {}, userRegistrationRequestPayload>, res) {  
   const newUser = new UserRegistration({
     name: req.body.name,
     email: req.body.email,
@@ -45,12 +42,53 @@ const registration = async function (req: any, res: any) {
   })
 }
 
+
+// Update the password in the database
+const updatePasswordInDatabase = function(userEmail: string, UserRegistration, newPassword: string, res){
+
+  UserRegistration.updateOne(
+    { email: userEmail },
+    { $set: { password: newPassword } }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          passwordUpdateMessage: 'Cannot update the password'
+        })
+      } else {
+        res.send({
+          passwordUpdateMessage: 'Password was updated successfully.'
+        })
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        passwordUpdateMessage: 'Error updating password=' + err
+      })
+    })
+
+}
+
+
+// Generate hash of new password
+const  generateHashPassword = function(UserRegistration, newPassword:string, userEmail:string, res){
+  bcrypt.genSalt(10, function (_err, salt) {
+    bcrypt.hash(newPassword, salt, function (hasherr, hash) {
+      if (hasherr) throw hasherr
+      newPassword = hash
+      updatePasswordInDatabase(userEmail, UserRegistration, newPassword, res);
+      
+    })
+  })
+}
+
+
 // @type    POST
 // @route   /api/auth/register
 // @desc    route for registration of users
 // @access  PUBLIC
 
-router.post('/register', (req, res) => {
+router.post('/register', body('email').isEmail(),(req: Request<userRegistrationRequestPayload>, res) => {
   UserRegistration.findOne({ email: req.body.email })
     .then((user) => {
       if (user) {
@@ -68,7 +106,7 @@ router.post('/register', (req, res) => {
 // @desc    route for login of registered users
 // @access  PUBLIC
 
-router.post('/login', (req, res) => {
+router.post('/login', body('email').isEmail(),(req: Request<{}, {},userLoginRequestPayload>, res) => {
   const loginPassword = req.body.password
   const loginEmail = req.body.email
   UserRegistration.findOne({ loginEmail })
@@ -80,19 +118,15 @@ router.post('/login', (req, res) => {
             if (!correctPassword) {
               return res.status(401).json({ message: 'User login failure' })
             }
-
             const payload = {
               id: user.id,
               name: user.name,
               email: user.email
             }
-
-            // Generate jwt token and send it back to client
-            jsonwt.sign(payload, passportSecretCode, { expiresIn: 3600 }, (_err, token) => {
-              res.json({
-                success: true,
-                token
-              })
+            let token = jwtTokenGeneration(payload);
+            res.json({
+              success: true,
+              token
             })
           })
           .catch((error) => {
@@ -108,18 +142,18 @@ router.post('/login', (req, res) => {
 })
 
 // @type    GET
-// @route    /api/auth/profile
+// @route   /api/auth/profile
 // @desc    route for user profile
 // @access  PRIVATE (authenticated using jwt token)
 
 router.get(
   '/profile',
   passport.authenticate('jwt', { session: false }),
-  (req: any, res: any) => {
+  (req: Request<{}, {},jwtTokenPayload>, res) => {
     res.status(200).json({
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email
+      id: req.body.id,
+      name: req.body.name,
+      email: req.body.email
     })
   }
 )
@@ -148,36 +182,9 @@ router.post(
                 .json({ profileUpdate: 'Your old password does not match' })
             }
 
-            // Generated hash of the new password
+            // Generated hash of the new password and Update in the database
+            generateHashPassword(UserRegistration, newPassword, userEmail, res);
 
-            bcrypt.genSalt(10, function (_err, salt) {
-              bcrypt.hash(newPassword, salt, function (hasherr, hash) {
-                if (hasherr) throw hasherr
-                newPassword = hash
-
-                // Update the password in the database
-                UserRegistration.updateOne(
-                  { email: userEmail },
-                  { $set: { password: newPassword } }
-                )
-                  .then((data) => {
-                    if (!data) {
-                      res.status(404).send({
-                        passwordUpdateMessage: 'Cannot update the password'
-                      })
-                    } else {
-                      res.send({
-                        passwordUpdateMessage: 'Password was updated successfully.'
-                      })
-                    }
-                  })
-                  .catch((err) => {
-                    res.status(500).send({
-                      passwordUpdateMessage: 'Error updating password=' + err
-                    })
-                  })
-              })
-            })
           })
           .catch((error) => {
             console.log(`Error with the user object ${error}`)
