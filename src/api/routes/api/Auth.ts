@@ -197,3 +197,5 @@ router.post(
     })
   }
 )
+
+export {generateHashPassword, updatePasswordInDatabase, registration}
