@@ -77,7 +77,6 @@ const  generateHashPassword = function(UserRegistration, newPassword:string, use
       if (hasherr) throw hasherr
       newPassword = hash
       updatePasswordInDatabase(userEmail, UserRegistration, newPassword, res);
-      
     })
   })
 }
